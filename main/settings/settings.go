@@ -1,13 +1,13 @@
 package settings
 
-const Workers int = 2
 const Boss int = 1
+const Workers int = 2
 const Clients = 1
 
 //Speed
-const WorkerSpeed = 8400
-const BossSpeed = 4000
-const ClientSpeed = 4400
+const BossSpeed = 40
+const WorkerSpeed = 80
+const ClientSpeed = 40
 
 // MAX range : 1 .. max of int
 const MaxTasks int = 5
