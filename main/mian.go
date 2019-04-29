@@ -1,4 +1,5 @@
 package main
+
 //Szafraniak Krzysztof
 // 244932
 
@@ -18,6 +19,12 @@ type Task struct {
 	operator string
 	result   int
 }
+
+type MachineManager struct {
+	push chan Task
+	pull chan Task
+}
+
 //Guard function
 func maybe(guard bool, c chan Task) chan Task {
 	if !guard {
@@ -45,10 +52,11 @@ func toStringWithoutResult(task *Task) {
 }
 
 //Function allow to communicate with user
-func userInterface(pullTableCmd chan []Task, pushTableCmd chan int, pullWareCmd chan []Task, pushWareCmd chan int) {
+func userInterface(pullTableCmd chan []Task, pushTableCmd chan int, pullWareCmd chan []Task,
+	pushWareCmd chan int, pushWorker [settings.Workers]chan int, pullWorker chan string) {
 	var version int
 	for {
-		fmt.Println("1-Show TaskTable 2-Show Warehouse")
+		fmt.Println("1-Show TaskTable 2-Show Warehouse 3-Worker Info")
 		fmt.Print("Option: ")
 		fmt.Scanf("%d\n", &version)
 		switch version {
@@ -64,12 +72,20 @@ func userInterface(pullTableCmd chan []Task, pushTableCmd chan int, pullWareCmd 
 			for _, v := range tab {
 				toString(&v)
 			}
+		case 3:
+			for _, k := range pushWorker {
+				k <- 1
+			}
+			for i := 0; i < settings.Workers; i++ {
+				fmt.Println(<-pullWorker)
+			}
 		}
+		time.Sleep(time.Millisecond)
 	}
 }
 
 //Responsible for storage task
-func taskTable(pullTasks chan Task, pushTask chan chan Task, pullTableCmd chan []Task, pushTableCmd chan int) {
+func taskTable(pushTasks chan Task, pullTask chan chan Task, pullTableCmd chan []Task, pushTableCmd chan int) {
 	var tTable = make([]Task, 0)
 	var length = 0
 	for {
@@ -80,11 +96,11 @@ func taskTable(pullTasks chan Task, pushTask chan chan Task, pullTableCmd chan [
 				pullTableCmd <- tTable
 			default:
 			}
-		case read := <-maybeChan(length > 0, pushTask):
+		case read := <-maybeChan(length > 0, pullTask):
 			read <- tTable[0]
 			tTable = tTable[1:]
 			length--
-		case write := <-maybe(length < settings.MaxTasks, pullTasks):
+		case write := <-maybe(length < settings.MaxTasks, pushTasks):
 			tTable = append(tTable, write)
 			length++
 		default:
@@ -94,7 +110,7 @@ func taskTable(pullTasks chan Task, pushTask chan chan Task, pullTableCmd chan [
 }
 
 //Storage solved tasks
-func warehouse(pullResult chan Task, pushResult chan chan Task, pullWareCmd chan []Task, pushWareCmd chan int) {
+func warehouse(pushResult chan Task, pullResult chan chan Task, pullWareCmd chan []Task, pushWareCmd chan int) {
 	var wh = make([]Task, 0)
 	var length = 0
 	for {
@@ -105,11 +121,11 @@ func warehouse(pullResult chan Task, pushResult chan chan Task, pullWareCmd chan
 				pullWareCmd <- wh
 			default:
 			}
-		case read := <-maybeChan(length > 0, pushResult):
+		case read := <-maybeChan(length > 0, pullResult):
 			read <- wh[0]
 			wh = wh[1:]
 			length--
-		case write := <-maybe(length < settings.MaxResults, pullResult):
+		case write := <-maybe(length < settings.MaxResults, pushResult):
 			wh = append(wh, write)
 			length++
 		default:
@@ -118,43 +134,116 @@ func warehouse(pullResult chan Task, pushResult chan chan Task, pullWareCmd chan
 	}
 }
 
-//pop task, solve it and push it to warehouse
-func worker(id int, popTask chan chan Task, pullResult chan Task) {
+func addingMachine(id int, manager MachineManager) {
 	for {
-		taskC := make(chan Task, 1)
-		popTask <- taskC
-		task := <-taskC
+		task := <-manager.push
+		time.Sleep(time.Duration(time.Millisecond * settings.AddingMachinesSpeed))
 		if TALKATIVE {
-			fmt.Println("Worker		", id, " do 			", task.arg1, task.operator, task.arg2)
+			fmt.Println("Adding		", id, " do 			", task.arg1, task.operator, task.arg2)
 		}
 		switch task.operator {
 		case "+":
 			r := task.arg1 + task.arg2
 			task.result = r
-			pullResult <- task
+			manager.pull <- task
 		case "-":
 			r := task.arg1 - task.arg2
 			task.result = r
-			pullResult <- task
-		case "*":
-			r := task.arg2 * task.arg1
-			task.result = r
-			pullResult <- task
+			manager.pull <- task
+
 		}
-		time.Sleep(time.Duration(rand.Intn(40)+80) * time.Millisecond * settings.WorkerSpeed)
+	}
+}
+
+func multiplyingMachine(id int, manager MachineManager) {
+	for {
+
+		task := <-manager.push
+		time.Sleep(time.Duration(time.Millisecond * settings.MultiplyingMachinesSpeed))
+		if TALKATIVE {
+			fmt.Println("Multi		", id, " do 			", task.arg1, task.operator, task.arg2)
+		}
+		r := task.arg2 * task.arg1
+		task.result = r
+		manager.pull <- task
+	}
+}
+
+//pop task, solve it and push it to warehouse
+func worker(id int, pullTask chan chan Task, pushResult chan Task, addManagers [settings.AddMachines]MachineManager,
+	multiManagers [settings.MultiMachines]MachineManager, pushCmd chan int, pullCmd chan string, r *rand.Rand) {
+	counter := 0
+	isPatient := r.Intn(2) == 0
+
+	for {
+		select {
+		case cmd := <-pushCmd:
+			if cmd == 1 {
+				str := fmt.Sprintf("Worker %d Patient : %t Done: %d", id, isPatient, counter)
+				pullCmd <- str
+			}
+		default:
+		}
+
+		taskC := make(chan Task, 1)
+		pullTask <- taskC
+		task := <-taskC
+		if TALKATIVE {
+			fmt.Println("Worker		", id, " do 			", task.arg1, task.operator, task.arg2)
+		}
+
+		var manager MachineManager
+		var maxIdx int
+		var idx int
+
+		if task.operator == "*" {
+			maxIdx = settings.MultiMachines
+			idx = r.Intn(maxIdx)
+			manager = multiManagers[idx]
+		} else {
+			maxIdx = settings.AddMachines
+			idx = r.Intn(maxIdx)
+			manager = addManagers[idx]
+		}
+
+		if isPatient {
+			manager.push <- task
+			pushResult <- <-manager.pull
+		} else {
+			done := false
+			for done == false {
+				select {
+				case manager.push <- task:
+					pushResult <- <-manager.pull
+					done = true
+				case <-time.After(time.Millisecond * settings.UnPatientTime):
+					idx++
+					if idx == maxIdx {
+						idx = 0
+					}
+					if task.operator == "*" {
+						manager = multiManagers[idx]
+					} else {
+						manager = addManagers[idx]
+					}
+				}
+			}
+		}
+		counter++
+		time.Sleep(time.Duration(time.Millisecond * settings.WorkerSpeed))
 	}
 }
 
 //Create new tasks
 func boss(id int, pullTask chan Task) {
-	tab := []string{"+", "-", "*"}
+	tab := []string{"+", "-","*"}
 	for {
 		task := Task{rand.Intn(1000), rand.Intn(1000), tab[rand.Intn(len(tab))], 0}
 		if TALKATIVE {
 			fmt.Println("Boss		", id, " pull new Task 	", task.arg1, task.operator, task.arg2)
 		}
 		pullTask <- task
-		time.Sleep(time.Duration(rand.Intn(40)+80) * time.Millisecond * settings.BossSpeed)
+		time.Sleep(time.Duration(time.Millisecond * settings.BossSpeed))
 	}
 }
 
@@ -167,7 +256,7 @@ func client(id int, popResult chan chan Task) {
 		if TALKATIVE {
 			fmt.Println("Client		", id, " take Result 	", task.arg1, task.operator, task.arg2, "=", task.result)
 		}
-		time.Sleep(time.Duration(rand.Intn(40)+80) * time.Millisecond * settings.ClientSpeed)
+		time.Sleep(time.Duration(time.Millisecond * settings.ClientSpeed))
 	}
 }
 
@@ -180,35 +269,63 @@ func main() {
 	if version == 1 {
 		TALKATIVE = true
 	}
-	pushTask := make(chan chan Task, 2)
-	pullTask := make(chan Task, 2)
-	pushResult := make(chan chan Task, 2)
-	pullResult := make(chan Task, 2)
+	pullTask := make(chan chan Task, 2)
+	pushTask := make(chan Task, 2)
+	pullResult := make(chan chan Task, 2)
+	pushResult := make(chan Task, 2)
 	pullTableCmd := make(chan []Task, 2)
 	pushTableCmd := make(chan int, 2)
 	pullWareCmd := make(chan []Task, 2)
 	pushWareCmd := make(chan int, 2)
 
+	var addingManager [settings.AddMachines]MachineManager
+	var multiplyingManager [settings.MultiMachines]MachineManager
+	var pushWorkerCmd [settings.Workers]chan int
+	pullWorkerCmd := make(chan string, settings.Workers)
+
+	for i := 0; i < settings.AddMachines; i++ {
+		addingManager[i] = MachineManager{make(chan Task, 1), make(chan Task, 1)}
+	}
+
+	for i := 0; i < settings.MultiMachines; i++ {
+		multiplyingManager[i] = MachineManager{make(chan Task, 1), make(chan Task, 1)}
+	}
+
+	for i := 0; i < settings.Workers; i++ {
+		pushWorkerCmd[i] = make(chan int, 2)
+	}
+
 	if !TALKATIVE {
-		go userInterface(pullTableCmd, pushTableCmd, pullWareCmd, pushWareCmd)
+		go userInterface(pullTableCmd, pushTableCmd, pullWareCmd, pushWareCmd, pushWorkerCmd, pullWorkerCmd)
 	}
 	//Start taskTable and warehouse
-	go taskTable(pullTask, pushTask, pullTableCmd, pushTableCmd)
-	go warehouse(pullResult, pushResult, pullWareCmd, pushWareCmd)
+	go taskTable(pushTask, pullTask, pullTableCmd, pushTableCmd)
+	go warehouse(pushResult, pullResult, pullWareCmd, pushWareCmd)
+
+	for i := 0; i < settings.AddMachines; i++ {
+		go addingMachine(i, addingManager[i])
+	}
+
+	for i := 0; i < settings.MultiMachines; i++ {
+		go multiplyingMachine(i, multiplyingManager[i])
+	}
 
 	//Start Bosses
 	for i := 0; i < settings.Boss; i++ {
-		go boss(i, pullTask)
+		go boss(i, pushTask)
 	}
 
 	//Start Workers
+
+	src := rand.NewSource(time.Now().UnixNano())
+	r := rand.New(src)
 	for i := 0; i < settings.Workers; i++ {
-		go worker(i, pushTask, pullResult)
+		go worker(i, pullTask, pushResult, addingManager, multiplyingManager, pushWorkerCmd[i], pullWorkerCmd, r)
 	}
 
 	//Start Clients
 	for i := 0; i < settings.Clients; i++ {
-		go client(i, pushResult)
+		go client(i, pullResult)
 	}
 
 	var wg sync.WaitGroup
