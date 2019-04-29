@@ -9,6 +9,7 @@ import (
 	"math/rand"
 	"sync"
 	"time"
+	"strconv"
 )
 
 var TALKATIVE = false
@@ -17,12 +18,24 @@ type Task struct {
 	arg1     int
 	arg2     int
 	operator string
-	result   int
+	result   string
 }
 
 type MachineManager struct {
-	push chan Task
-	pull chan Task
+	push     chan Task
+	pull     chan Task
+	backdoor chan string
+}
+
+type ReportDamage struct {
+	add   chan int
+	multi chan int
+}
+type ServiceManager struct {
+	repairedAdd   chan int
+	repairedMulti chan int
+	repairAdd     chan int
+	repairMulti   chan int
 }
 
 //Guard function
@@ -135,43 +148,137 @@ func warehouse(pushResult chan Task, pullResult chan chan Task, pullWareCmd chan
 }
 
 func addingMachine(id int, manager MachineManager) {
+	var isBroken = false
+	var task Task
 	for {
-		task := <-manager.push
-		time.Sleep(time.Duration(time.Millisecond * settings.AddingMachinesSpeed))
-		if TALKATIVE {
-			fmt.Println("Adding		", id, " do 			", task.arg1, task.operator, task.arg2)
-		}
-		switch task.operator {
-		case "+":
-			r := task.arg1 + task.arg2
-			task.result = r
-			manager.pull <- task
-		case "-":
-			r := task.arg1 - task.arg2
-			task.result = r
-			manager.pull <- task
+		select {
+		case task = <-manager.push:
+		case message := <-manager.backdoor:
+			if message == "FIX" {
+				isBroken = false
+			}
+			continue
 
+		}
+
+		if isBroken {
+			if TALKATIVE {
+				fmt.Println("Adding		", id, " do 			", task.arg1, task.operator, task.arg2, " BROKEN!!")
+			}
+			manager.pull <- task
+		} else {
+			if TALKATIVE {
+				fmt.Println("Adding		", id, " do 			", task.arg1, task.operator, task.arg2)
+			}
+			time.Sleep(time.Millisecond * settings.AddingMachinesSpeed)
+			switch task.operator {
+			case "+":
+				r := task.arg1 + task.arg2
+				task.result = strconv.Itoa(r)
+				manager.pull <- task
+			case "-":
+				r := task.arg1 - task.arg2
+				task.result = strconv.Itoa(r)
+				manager.pull <- task
+
+			}
+			isBroken = rand.Float32() < settings.PropOfMachDamage
 		}
 	}
 }
 
 func multiplyingMachine(id int, manager MachineManager) {
+	var isBroken = false
+	var task Task
 	for {
+		select {
+		case task = <-manager.push:
+		case message := <-manager.backdoor:
+			if message == "FIX" {
+				isBroken = false
+			}
+			continue
+			}
 
-		task := <-manager.push
-		time.Sleep(time.Duration(time.Millisecond * settings.MultiplyingMachinesSpeed))
-		if TALKATIVE {
-			fmt.Println("Multi		", id, " do 			", task.arg1, task.operator, task.arg2)
+		if isBroken {
+			if TALKATIVE {
+				fmt.Println("Adding		", id, " do 			", task.arg1, task.operator, task.arg2, " BROKEN!!")
+			}
+			manager.pull <- task
+		} else {
+			if TALKATIVE {
+				fmt.Println("Multi		", id, " do 			", task.arg1, task.operator, task.arg2)
+			}
+			time.Sleep(time.Millisecond * settings.MultiplyingMachinesSpeed)
+			r := task.arg2 * task.arg1
+			task.result = strconv.Itoa(r)
+			manager.pull <- task
 		}
-		r := task.arg2 * task.arg1
-		task.result = r
-		manager.pull <- task
 	}
+}
+
+func service(reportDamage ReportDamage, addManagers [settings.AddMachines]MachineManager,
+	multiManagers [settings.MultiMachines]MachineManager) {
+	var serviceManager = ServiceManager{make(chan int, 3), make(chan int, 3), make(chan int, 3), make(chan int, 3)}
+	var addIsFixing [settings.AddMachines] bool
+	var multiIsFixing [settings.MultiMachines] bool
+
+	for i := 0; i < settings.AddMachines; i++ {
+		addIsFixing[i] = false
+	}
+	for i := 0; i < settings.MultiMachines; i++ {
+		multiIsFixing[i] = false
+	}
+	for i := 0; i < settings.ServiceTechnicians; i++ {
+		go serviceman(i, serviceManager, addManagers, multiManagers)
+	}
+
+	for {
+		select {
+		case idx := <-reportDamage.add:
+			if !addIsFixing[idx] {
+				addIsFixing[idx] = true
+				serviceManager.repairAdd <- idx
+			}
+		case idx := <-reportDamage.multi:
+			if !multiIsFixing[idx] {
+				multiIsFixing[idx] = true
+				serviceManager.repairMulti <- idx
+			}
+		case idx := <-serviceManager.repairedAdd:
+			addIsFixing[idx] = false
+		case idx := <-serviceManager.repairedMulti:
+			multiIsFixing[idx] = false
+		}
+		time.Sleep(time.Millisecond )
+	}
+}
+
+func serviceman(id int, service ServiceManager, addManagers [settings.AddMachines]MachineManager,
+	multiManagers [settings.MultiMachines]MachineManager) {
+	for {
+		select {
+		case idx := <-service.repairAdd:
+			time.Sleep(time.Millisecond * settings.ServicemanWayTime)
+			addManagers[idx].backdoor <- "FIX"
+			service.repairedAdd <- idx
+			if TALKATIVE{
+				fmt.Println("Adding Machine REPAIRED, id: ", idx," serviceman : ",id)
+			}
+		case idx := <-service.repairMulti:
+			multiManagers[idx].backdoor <- "FIX"
+			service.repairedMulti <- idx
+			if TALKATIVE{
+				fmt.Println("Multiplying Machine REPAIRED , id: ", idx," serviceman : ",id)
+			}
+		}
+	}
+
 }
 
 //pop task, solve it and push it to warehouse
 func worker(id int, pullTask chan chan Task, pushResult chan Task, addManagers [settings.AddMachines]MachineManager,
-	multiManagers [settings.MultiMachines]MachineManager, pushCmd chan int, pullCmd chan string, r *rand.Rand) {
+	multiManagers [settings.MultiMachines]MachineManager, pushCmd chan int, pullCmd chan string, r *rand.Rand, damage ReportDamage) {
 	counter := 0
 	isPatient := r.Intn(2) == 0
 
@@ -196,54 +303,66 @@ func worker(id int, pullTask chan chan Task, pushResult chan Task, addManagers [
 		var maxIdx int
 		var idx int
 
-		if task.operator == "*" {
-			maxIdx = settings.MultiMachines
-			idx = r.Intn(maxIdx)
-			manager = multiManagers[idx]
-		} else {
-			maxIdx = settings.AddMachines
-			idx = r.Intn(maxIdx)
-			manager = addManagers[idx]
-		}
+		for task.result == "" {
+			if task.operator == "*" {
+				maxIdx = settings.MultiMachines
+				idx = r.Intn(maxIdx)
+				manager = multiManagers[idx]
+			} else {
+				maxIdx = settings.AddMachines
+				idx = r.Intn(maxIdx)
+				manager = addManagers[idx]
+			}
 
-		if isPatient {
-			manager.push <- task
-			pushResult <- <-manager.pull
-		} else {
-			done := false
-			for done == false {
-				select {
-				case manager.push <- task:
-					pushResult <- <-manager.pull
-					done = true
-				case <-time.After(time.Millisecond * settings.UnPatientTime):
-					idx++
-					if idx == maxIdx {
-						idx = 0
-					}
-					if task.operator == "*" {
-						manager = multiManagers[idx]
-					} else {
-						manager = addManagers[idx]
+			if isPatient {
+				manager.push <- task
+				task = <-manager.pull
+			} else {
+				done := false
+				for done == false {
+					select {
+					case manager.push <- task:
+						task = <-manager.pull
+						done = true
+					case <-time.After(time.Millisecond * settings.UnPatientTime):
+						idx++
+						if idx == maxIdx {
+							idx = 0
+						}
+						if task.operator == "*" {
+							manager = multiManagers[idx]
+						} else {
+							manager = addManagers[idx]
+						}
+						time.Sleep(time.Millisecond*settings.ChangeMachineTime)
 					}
 				}
 			}
+			if task.result == "" {
+				if task.operator == "*" {
+					damage.multi <- idx
+				} else {
+					damage.add <- idx
+				}
+				time.Sleep(time.Millisecond*settings.ChangeMachineTime)
+			}
 		}
+		pushResult <- task
 		counter++
-		time.Sleep(time.Duration(time.Millisecond * settings.WorkerSpeed))
+		time.Sleep(time.Millisecond * settings.WorkerSpeed)
 	}
 }
 
 //Create new tasks
 func boss(id int, pullTask chan Task) {
-	tab := []string{"+", "-","*"}
+	tab := []string{"+", "-", "*"}
 	for {
-		task := Task{rand.Intn(1000), rand.Intn(1000), tab[rand.Intn(len(tab))], 0}
+		task := Task{rand.Intn(1000), rand.Intn(1000), tab[rand.Intn(len(tab))], ""}
 		if TALKATIVE {
 			fmt.Println("Boss		", id, " pull new Task 	", task.arg1, task.operator, task.arg2)
 		}
 		pullTask <- task
-		time.Sleep(time.Duration(time.Millisecond * settings.BossSpeed))
+		time.Sleep(time.Millisecond * settings.BossSpeed)
 	}
 }
 
@@ -256,7 +375,7 @@ func client(id int, popResult chan chan Task) {
 		if TALKATIVE {
 			fmt.Println("Client		", id, " take Result 	", task.arg1, task.operator, task.arg2, "=", task.result)
 		}
-		time.Sleep(time.Duration(time.Millisecond * settings.ClientSpeed))
+		time.Sleep(time.Millisecond * settings.ClientSpeed)
 	}
 }
 
@@ -281,14 +400,15 @@ func main() {
 	var addingManager [settings.AddMachines]MachineManager
 	var multiplyingManager [settings.MultiMachines]MachineManager
 	var pushWorkerCmd [settings.Workers]chan int
+	damage := ReportDamage{make(chan int,3),make(chan int, 3)}
 	pullWorkerCmd := make(chan string, settings.Workers)
 
 	for i := 0; i < settings.AddMachines; i++ {
-		addingManager[i] = MachineManager{make(chan Task, 1), make(chan Task, 1)}
+		addingManager[i] = MachineManager{make(chan Task, 1), make(chan Task, 1), make(chan string, 1)}
 	}
 
 	for i := 0; i < settings.MultiMachines; i++ {
-		multiplyingManager[i] = MachineManager{make(chan Task, 1), make(chan Task, 1)}
+		multiplyingManager[i] = MachineManager{make(chan Task, 1), make(chan Task, 1), make(chan string, 1)}
 	}
 
 	for i := 0; i < settings.Workers; i++ {
@@ -301,6 +421,7 @@ func main() {
 	//Start taskTable and warehouse
 	go taskTable(pushTask, pullTask, pullTableCmd, pushTableCmd)
 	go warehouse(pushResult, pullResult, pullWareCmd, pushWareCmd)
+	go service(damage,addingManager,multiplyingManager)
 
 	for i := 0; i < settings.AddMachines; i++ {
 		go addingMachine(i, addingManager[i])
@@ -320,7 +441,7 @@ func main() {
 	src := rand.NewSource(time.Now().UnixNano())
 	r := rand.New(src)
 	for i := 0; i < settings.Workers; i++ {
-		go worker(i, pullTask, pushResult, addingManager, multiplyingManager, pushWorkerCmd[i], pullWorkerCmd, r)
+		go worker(i, pullTask, pushResult, addingManager, multiplyingManager, pushWorkerCmd[i], pullWorkerCmd, r,damage)
 	}
 
 	//Start Clients
