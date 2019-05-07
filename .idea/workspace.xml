@@ -2,6 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="9ff2830e-58b7-475f-b52c-34f18c1abdc8" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main/mian.go" beforeDir="false" afterPath="$PROJECT_DIR$/main/mian.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main/settings/settings.go" beforeDir="false" afterPath="$PROJECT_DIR$/main/settings/settings.go" afterDir="false" />
     </list>
@@ -16,8 +17,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/main/settings/settings.go">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="272">
-              <caret line="16" column="27" selection-start-line="16" selection-start-column="27" selection-end-line="16" selection-end-column="27" />
+            <state relative-caret-position="391">
+              <caret line="23" column="28" selection-start-line="23" selection-start-column="28" selection-end-line="23" selection-end-column="28" />
             </state>
           </provider>
         </entry>
@@ -25,18 +26,18 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/main/mian.go">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-2420">
-              <caret line="271" column="57" selection-start-line="271" selection-start-column="57" selection-end-line="271" selection-end-column="57" />
+            <state relative-caret-position="209">
+              <caret line="165" column="52" selection-start-line="165" selection-start-column="49" selection-end-line="165" selection-end-column="52" />
               <folding>
-                <element signature="e#48#108#0" expanded="true" />
                 <element signature="n#!!block;n#maybe#0" />
                 <element signature="n#!!block;n#maybeChan#0" />
                 <element signature="n#!!block;n#toString#0" />
                 <element signature="n#!!block;n#toStringWithoutResult#0" />
                 <element signature="n#!!block;n#userInterface#0" />
+                <element signature="n#!!block;n#taskTable#0" />
                 <element signature="n#!!block;n#warehouse#0" />
-                <element signature="n#!!block;n#boss#0" />
-                <element signature="n#!!block;n#client#0" />
+                <element signature="n#!!block;n#multiplyingMachine#0" />
+                <element signature="n#!!block;n#main#1" />
               </folding>
             </state>
           </provider>
@@ -70,13 +71,16 @@
       <find>adding</find>
       <find>dding</find>
       <find>Adding</find>
-      <find>Adding</find>
       <find>2 + 7</find>
-      <find>worker</find>
       <find>worker</find>
       <find>servi</find>
       <find>addin</find>
       <find>BROKEN</find>
+      <find>boss</find>
+      <find>change</find>
+      <find>serviceman</find>
+      <find>do</find>
+      <find>do</find>
     </findStrings>
   </component>
   <component name="GOROOT" path="C:\Go" />
@@ -110,8 +114,8 @@
     </option>
   </component>
   <component name="ProjectFrameBounds" extendedState="6">
-    <option name="x" value="215" />
-    <option name="y" value="-30" />
+    <option name="x" value="-10" />
+    <option name="y" value="-10" />
     <option name="width" value="1750" />
     <option name="height" value="980" />
   </component>
@@ -212,14 +216,15 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="-7" y="-7" width="1550" height="838" extended-state="6" />
+    <editor active="true" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.17114094" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.17785235" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" />
-      <window_info anchor="bottom" id="Run" order="2" weight="0.9575071" />
-      <window_info anchor="bottom" id="Debug" order="3" weight="0.3243626" />
+      <window_info anchor="bottom" id="Run" order="2" weight="0.31728044" />
+      <window_info anchor="bottom" id="Debug" order="3" weight="0.43201134" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
       <window_info anchor="bottom" id="TODO" order="6" />
@@ -284,26 +289,26 @@
     <entry file="file://$PROJECT_DIR$/main/settings/maybe.go" />
     <entry file="file://$PROJECT_DIR$/main/mian.go">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-2420">
-          <caret line="271" column="57" selection-start-line="271" selection-start-column="57" selection-end-line="271" selection-end-column="57" />
+        <state relative-caret-position="209">
+          <caret line="165" column="52" selection-start-line="165" selection-start-column="49" selection-end-line="165" selection-end-column="52" />
           <folding>
-            <element signature="e#48#108#0" expanded="true" />
             <element signature="n#!!block;n#maybe#0" />
             <element signature="n#!!block;n#maybeChan#0" />
             <element signature="n#!!block;n#toString#0" />
             <element signature="n#!!block;n#toStringWithoutResult#0" />
             <element signature="n#!!block;n#userInterface#0" />
+            <element signature="n#!!block;n#taskTable#0" />
             <element signature="n#!!block;n#warehouse#0" />
-            <element signature="n#!!block;n#boss#0" />
-            <element signature="n#!!block;n#client#0" />
+            <element signature="n#!!block;n#multiplyingMachine#0" />
+            <element signature="n#!!block;n#main#1" />
           </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/main/settings/settings.go">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="272">
-          <caret line="16" column="27" selection-start-line="16" selection-start-column="27" selection-end-line="16" selection-end-column="27" />
+        <state relative-caret-position="391">
+          <caret line="23" column="28" selection-start-line="23" selection-start-column="28" selection-end-line="23" selection-end-column="28" />
         </state>
       </provider>
     </entry>

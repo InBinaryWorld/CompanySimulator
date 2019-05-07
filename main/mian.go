@@ -163,12 +163,12 @@ func addingMachine(id int, manager MachineManager) {
 
 		if isBroken {
 			if TALKATIVE {
-				fmt.Println("Adding		", id, " do 			", task.arg1, task.operator, task.arg2, " BROKEN!!")
+				fmt.Println("Adding		", id, " do 		", task.arg1, task.operator, task.arg2, " BROKEN!!")
 			}
 			manager.pull <- task
 		} else {
 			if TALKATIVE {
-				fmt.Println("Adding		", id, " do 			", task.arg1, task.operator, task.arg2)
+				fmt.Println("Adding		", id, " do 		", task.arg1, task.operator, task.arg2)
 			}
 			time.Sleep(time.Millisecond * settings.AddingMachinesSpeed)
 			switch task.operator {
@@ -202,17 +202,18 @@ func multiplyingMachine(id int, manager MachineManager) {
 
 		if isBroken {
 			if TALKATIVE {
-				fmt.Println("Adding		", id, " do 			", task.arg1, task.operator, task.arg2, " BROKEN!!")
+				fmt.Println("Multi		", id, " do 		", task.arg1, task.operator, task.arg2, " BROKEN!!")
 			}
 			manager.pull <- task
 		} else {
 			if TALKATIVE {
-				fmt.Println("Multi		", id, " do 			", task.arg1, task.operator, task.arg2)
+				fmt.Println("Multi		", id, " do 		", task.arg1, task.operator, task.arg2)
 			}
 			time.Sleep(time.Millisecond * settings.MultiplyingMachinesSpeed)
 			r := task.arg2 * task.arg1
 			task.result = strconv.Itoa(r)
 			manager.pull <- task
+			isBroken = rand.Float32() < settings.PropOfMachDamage
 		}
 	}
 }
@@ -261,16 +262,19 @@ func serviceman(id int, service ServiceManager, addManagers [settings.AddMachine
 		case idx := <-service.repairAdd:
 			time.Sleep(time.Millisecond * settings.ServicemanWayTime)
 			addManagers[idx].backdoor <- "FIX"
-			service.repairedAdd <- idx
 			if TALKATIVE{
 				fmt.Println("Adding Machine REPAIRED, id: ", idx," serviceman : ",id)
 			}
+			time.Sleep(100)
+			service.repairedAdd <- idx
 		case idx := <-service.repairMulti:
+			time.Sleep(time.Millisecond * settings.ServicemanWayTime)
 			multiManagers[idx].backdoor <- "FIX"
-			service.repairedMulti <- idx
 			if TALKATIVE{
 				fmt.Println("Multiplying Machine REPAIRED , id: ", idx," serviceman : ",id)
 			}
+			time.Sleep(100)
+			service.repairedMulti <- idx
 		}
 	}
 
@@ -296,7 +300,7 @@ func worker(id int, pullTask chan chan Task, pushResult chan Task, addManagers [
 		pullTask <- taskC
 		task := <-taskC
 		if TALKATIVE {
-			fmt.Println("Worker		", id, " do 			", task.arg1, task.operator, task.arg2)
+			fmt.Println("Worker		", id, " do 		", task.arg1, task.operator, task.arg2)
 		}
 
 		var manager MachineManager
@@ -359,7 +363,7 @@ func boss(id int, pullTask chan Task) {
 	for {
 		task := Task{rand.Intn(1000), rand.Intn(1000), tab[rand.Intn(len(tab))], ""}
 		if TALKATIVE {
-			fmt.Println("Boss		", id, " pull new Task 	", task.arg1, task.operator, task.arg2)
+			fmt.Println("Boss		", id, " push Task 	", task.arg1, task.operator, task.arg2)
 		}
 		pullTask <- task
 		time.Sleep(time.Millisecond * settings.BossSpeed)
@@ -373,7 +377,7 @@ func client(id int, popResult chan chan Task) {
 		popResult <- result
 		task := <-result
 		if TALKATIVE {
-			fmt.Println("Client		", id, " take Result 	", task.arg1, task.operator, task.arg2, "=", task.result)
+			fmt.Println("Client		", id, " take Result	", task.arg1, task.operator, task.arg2, "=", task.result)
 		}
 		time.Sleep(time.Millisecond * settings.ClientSpeed)
 	}
