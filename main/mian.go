@@ -220,7 +220,9 @@ func multiplyingMachine(id int, manager MachineManager) {
 
 func service(reportDamage ReportDamage, addManagers [settings.AddMachines]MachineManager,
 	multiManagers [settings.MultiMachines]MachineManager) {
-	var serviceManager = ServiceManager{make(chan int, 3), make(chan int, 3), make(chan int, 3), make(chan int, 3)}
+		var buffSize = settings.AddMachines+settings.MultiMachines
+	var serviceManager = ServiceManager{make(chan int, buffSize), make(chan int, buffSize),
+		make(chan int, buffSize), make(chan int, buffSize)}
 	var addIsFixing [settings.AddMachines] bool
 	var multiIsFixing [settings.MultiMachines] bool
 

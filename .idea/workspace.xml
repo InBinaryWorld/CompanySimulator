@@ -4,7 +4,6 @@
     <list default="true" id="9ff2830e-58b7-475f-b52c-34f18c1abdc8" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main/mian.go" beforeDir="false" afterPath="$PROJECT_DIR$/main/mian.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/main/settings/settings.go" beforeDir="false" afterPath="$PROJECT_DIR$/main/settings/settings.go" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -14,7 +13,7 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/main/settings/settings.go">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="391">
@@ -23,12 +22,13 @@
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="false">
+      <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/main/mian.go">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="209">
-              <caret line="165" column="52" selection-start-line="165" selection-start-column="49" selection-end-line="165" selection-end-column="52" />
+            <state relative-caret-position="3808">
+              <caret line="224" column="57" selection-start-line="224" selection-start-column="57" selection-end-line="224" selection-end-column="57" />
               <folding>
+                <element signature="e#48#119#0" expanded="true" />
                 <element signature="n#!!block;n#maybe#0" />
                 <element signature="n#!!block;n#maybeChan#0" />
                 <element signature="n#!!block;n#toString#0" />
@@ -83,7 +83,7 @@
       <find>do</find>
     </findStrings>
   </component>
-  <component name="GOROOT" path="C:\Go" />
+  <component name="GOROOT" path="D:/Go" />
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
@@ -108,8 +108,8 @@
         <option value="$PROJECT_DIR$/main/settings/task.go" />
         <option value="$PROJECT_DIR$/main/testty/machineManager.go" />
         <option value="$PROJECT_DIR$/main/settings/maybe.go" />
-        <option value="$PROJECT_DIR$/main/mian.go" />
         <option value="$PROJECT_DIR$/main/settings/settings.go" />
+        <option value="$PROJECT_DIR$/main/mian.go" />
       </list>
     </option>
   </component>
@@ -141,40 +141,21 @@
           <select />
         </subPane>
       </pane>
-      <pane id="ProjectPane">
-        <subPane>
-          <expand>
-            <path>
-              <item name="go" type="b2602c69:ProjectViewProjectNode" />
-              <item name="go" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="go" type="b2602c69:ProjectViewProjectNode" />
-              <item name="go" type="462c0819:PsiDirectoryNode" />
-              <item name="main" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="go" type="b2602c69:ProjectViewProjectNode" />
-              <item name="go" type="462c0819:PsiDirectoryNode" />
-              <item name="main" type="462c0819:PsiDirectoryNode" />
-              <item name="settings" type="462c0819:PsiDirectoryNode" />
-            </path>
-          </expand>
-          <select />
-        </subPane>
-      </pane>
+      <pane id="ProjectPane" />
     </panes>
   </component>
   <component name="PropertiesComponent">
     <property name="DefaultGoTemplateProperty" value="Go File" />
     <property name="GO_FMT" value="true" />
+    <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="configurable.Global.GOPATH.is.expanded" value="true" />
     <property name="configurable.Module.GOPATH.is.expanded" value="false" />
     <property name="configurable.Project.GOPATH.is.expanded" value="true" />
     <property name="go.gopath.indexing.explicitly.defined" value="true" />
+    <property name="go.import.settings.migrated" value="true" />
     <property name="go.sdk.automatically.set" value="true" />
-    <property name="last_opened_file_path" value="$USER_HOME$" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
     <property name="run.code.analysis.last.selected.profile" value="pProject Default" />
     <property name="settings.editor.selected.configurable" value="reference.settingsdialog.IDE.editor.colors" />
   </component>
@@ -215,15 +196,14 @@
     </recent_temporary>
   </component>
   <component name="ToolWindowManager">
-    <frame x="-7" y="-7" width="1550" height="838" extended-state="6" />
-    <editor active="true" />
+    <frame x="-8" y="-8" width="1382" height="744" extended-state="6" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.17785235" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.1860817" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" />
-      <window_info anchor="bottom" id="Run" order="2" weight="0.31728044" />
+      <window_info anchor="bottom" id="Run" order="2" weight="0.43698853" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.43201134" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
@@ -270,28 +250,24 @@
     <option name="LAST_COMMIT_MESSAGE" value="Quiet and talkative mode." />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://C:/Go/src/runtime/panic.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="106">
-          <caret line="689" column="12" lean-forward="true" selection-start-line="689" selection-start-column="12" selection-end-line="689" selection-end-column="12" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://C:/Go/src/runtime/sema.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-8947">
-          <caret line="55" selection-start-line="55" selection-end-line="55" />
-        </state>
-      </provider>
-    </entry>
+    <entry file="file://C:/Go/src/runtime/panic.go" />
+    <entry file="file://C:/Go/src/runtime/sema.go" />
     <entry file="file://$PROJECT_DIR$/main/testty/task.go" />
     <entry file="file://$PROJECT_DIR$/main/testty/machineManager.go" />
     <entry file="file://$PROJECT_DIR$/main/settings/maybe.go" />
+    <entry file="file://$PROJECT_DIR$/main/settings/settings.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="391">
+          <caret line="23" column="28" selection-start-line="23" selection-start-column="28" selection-end-line="23" selection-end-column="28" />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/main/mian.go">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="209">
-          <caret line="165" column="52" selection-start-line="165" selection-start-column="49" selection-end-line="165" selection-end-column="52" />
+        <state relative-caret-position="3808">
+          <caret line="224" column="57" selection-start-line="224" selection-start-column="57" selection-end-line="224" selection-end-column="57" />
           <folding>
+            <element signature="e#48#119#0" expanded="true" />
             <element signature="n#!!block;n#maybe#0" />
             <element signature="n#!!block;n#maybeChan#0" />
             <element signature="n#!!block;n#toString#0" />
@@ -302,13 +278,6 @@
             <element signature="n#!!block;n#multiplyingMachine#0" />
             <element signature="n#!!block;n#main#1" />
           </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/main/settings/settings.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="391">
-          <caret line="23" column="28" selection-start-line="23" selection-start-column="28" selection-end-line="23" selection-end-column="28" />
         </state>
       </provider>
     </entry>
